@@ -431,7 +431,7 @@
                         </div>
                         <div style="display: flex;">
                             <div style="width: 90px; font-weight: 600;">Version:</div>
-                            <div>2.1 (Stable Build)</div>
+                            <div>2.2 (Stable Build)</div>
                         </div>
                     </div>
                 </div>
@@ -504,14 +504,15 @@
             : "MAPPING: ELICIT/ENGAGE->A,B. EXPLORE->C,D. EXPLAIN->E. ELABORATE->F,G,H. EVALUATE->I. EXTEND->J.";
 
         const commonInst = `Std Inputs: CS:"${data.cs}", PS:"${data.ps}", LC:"${data.lc}". 
-        RULES: 
-        1. OBJECTIVES: Must formulate specific Cognitive, Psychomotor, and Affective objectives.
-        2. INTEGRATION: Integrate at least 3 specific subjects (Math, English, etc.) listed on separate lines.
-        3. II. CONTENT: Generate detailed subject matter/key concepts, not just the topic title.
-        4. PROCEDURES: Follow ${data.model} model using ${modelInst}. Include specific activities.
-        5. RUBRICS: For every activity, provide a scoring rubric/guide on a new line.
-        6. Step J (Additional Activities): Provide specific remediation/enrichment activities.
-        7. Use double newlines for spacing.`;
+        MANDATORY INSTRUCTIONS (Strictly Follow):
+        1. OBJECTIVES: Formulate specific objectives for COGNITIVE, PSYCHOMOTOR, and AFFECTIVE domains.
+        2. INTEGRATION: Integrate at least 3 specific subjects (e.g. Math, English, Values) and list them clearly on separate lines.
+        3. II. CONTENT: Generate detailed subject matter key concepts/outline (NOT just the topic title).
+        4. PROCEDURES: Follow the ${data.model} model using this mapping: ${modelInst}.
+        5. RUBRICS: For EVERY activity/task in the procedures, provide a specific SCORING RUBRIC (e.g., 5pts - criteria, 3pts - criteria) on a new line.
+        6. REMEDIATION: In Step J, provide specific remediation/enrichment activities.
+        7. SPACING: Use double newlines between sections for clarity.
+        8. FORMAT: Use Markdown tables or lists where appropriate.`;
         
         let prompt = "";
         if (isDLP) {
