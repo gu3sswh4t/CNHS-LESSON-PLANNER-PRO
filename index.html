@@ -13,13 +13,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         body { font-family: 'Roboto', sans-serif; background: var(--bg-app); height: 100vh; display: flex; overflow: hidden; color: #334155; }
         
-        /* SCROLLBAR */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* SIDEBAR */
         .sidebar { width: 400px; background: white; border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; overflow-y: auto; z-index: 10; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.05); }
         .sidebar-header { padding: 25px 20px; background: var(--primary); color: white; position: relative; overflow: hidden; }
         .sidebar-header::after { content: ''; position: absolute; top: -50%; right: -50%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; }
@@ -40,7 +38,6 @@
         .row { display: flex; gap: 12px; }
         .row > div { flex: 1; }
 
-        /* BUTTONS */
         .btn-generate { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem; }
         .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
         .btn-generate:active { transform: translateY(0); }
@@ -53,11 +50,9 @@
         .btn-dev { background: #334155; color: white; border: none; margin-top: 5px; width: 100%; }
         .btn-dev:hover { background: #1e293b; }
 
-        /* HOME BTN */
         .btn-home-back { background: linear-gradient(45deg, #0f172a, #334155); color: white; border: none; padding: 12px; border-radius: 50px; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.3s ease; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-home-back:hover { transform: translateY(-2px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
 
-        /* PREVIEW AREA */
         .preview-area { flex: 1; background: #cbd5e1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
         .bond-paper { background: white; width: var(--paper-width); min-height: var(--paper-height); padding: 10mm 12mm; box-shadow: 0 20px 50px rgba(0,0,0,0.15); margin-bottom: 50px; position: relative; display: flex; flex-direction: column; color: black; font-family: Arial, Helvetica, sans-serif; transition: width 0.3s ease; }
         .bond-paper.landscape { width: 330mm; min-height: 216mm; }
@@ -67,7 +62,6 @@
         .official-header h5 { margin: 0; font-size: 9pt; font-weight: normal; }
         .official-header h4 { margin: 4px 0; font-size: 11pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* TABLES */
         .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 9pt; table-layout: fixed; }
         .tpl-table td, .tpl-table th { border: 1px solid black; padding: 6px; vertical-align: top; overflow-wrap: break-word; word-wrap: break-word; }
         .header-label { width: 15%; background: #f1f5f9; text-align: left; font-weight: bold; vertical-align: middle; font-size: 8pt; text-transform: uppercase; }
@@ -78,7 +72,6 @@
         .dll-row-header { background: #f8fafc; font-weight: bold; width: 160px; font-size: 8.5pt; }
         .col-day { width: 18%; }
         
-        /* SIGNATORIES */
         .signature-section { margin-top: auto; padding-top: 30px; font-size: 9pt; page-break-inside: avoid; display: flex; justify-content: space-between; gap: 20px; }
         .sig-block { flex: 1; text-align: center; }
         .sig-label { text-align: left; font-size: 8pt; margin-bottom: 35px; }
@@ -126,7 +119,7 @@
             </select>
         </div>
 
-        <div class="form-group"><label>School Name</label><input type="text" id="school" value="COGON NATIONAL HIGH SCHOOL" oninput="liveUpdateHeader()" required></div>
+        <input type="hidden" id="school" value="COGON NATIONAL HIGH SCHOOL">
         
         <div id="dlp-date-group">
             <div class="form-group"><label>Teacher Name *</label><input type="text" id="teacher" placeholder="e.g. Juan A. Dela Cruz" required></div>
@@ -211,7 +204,6 @@
                 <option value="4As">4A's (Activity, Analysis, Abstraction, Application)</option>
                 <option value="5Es">5E's (Engage, Explore, Explain, Elaborate, Evaluate)</option>
                 <option value="7Es">7E's (Elicit, Engage, Explore, Explain, Elaborate, Evaluate, Extend)</option>
-                <option value="IDEA">IDEA (Introduction, Development, Engagement, Assimilation)</option>
             </select>
         </div>
 
@@ -248,7 +240,7 @@
             <h5>Republic of the Philippines</h5>
             <h5>Department of Education</h5>
             <h5>Region XI</h5>
-            <h4 id="displaySchoolHeader">COGON NATIONAL HIGH SCHOOL</h4>
+            <h4>COGON NATIONAL HIGH SCHOOL</h4>
             <h5>Division of the Island Garden City of Samal</h5>
         </div>
 
@@ -303,7 +295,7 @@
         
         return {
             docType: type,
-            school: document.getElementById('school').value, 
+            school: "COGON NATIONAL HIGH SCHOOL", 
             teacher: teacherName,
             dlpDate: document.getElementById('dlp-date').value, 
             teachingTime: teachingTime,
@@ -324,7 +316,6 @@
             ps: document.getElementById('ps').value, 
             lc: document.getElementById('lc').value,
             
-            // These will be filled by AI if empty initially
             cs_cog: document.getElementById('cs_cog').value,
             cs_psy: document.getElementById('cs_psy').value,
             cs_aff: document.getElementById('cs_aff').value,
@@ -337,12 +328,6 @@
             approver: document.getElementById('approver').value,
             approverPos: document.getElementById('approverPos').value
         };
-    }
-    
-    function liveUpdateHeader() {
-        const val = document.getElementById('school').value;
-        document.getElementById('displaySchoolHeader').innerText = val ? val.toUpperCase() : "SCHOOL NAME";
-        renderEmptyLayout();
     }
 
     function renderEmptyLayout() {
@@ -369,7 +354,7 @@
         headerArea.innerHTML = `
             <table class="tpl-table" style="margin-bottom:5px;">
                 <tr>
-                    <td class="header-label">School</td><td class="header-val">${data.school.toUpperCase()}</td>
+                    <td class="header-label">School</td><td class="header-val">${data.school}</td>
                     <td class="header-label">Grade Level</td><td class="header-val">${data.grade}</td>
                 </tr>
                 <tr>
@@ -422,7 +407,6 @@
             gridRows += `</tr>`;
         });
 
-        // Format Standards display (Show placeholders if empty)
         let standardsHtml = "";
         if(data.cs_cog || data.cs_psy || data.cs_aff) {
             standardsHtml = `
@@ -510,7 +494,6 @@
     async function generatePlan() {
         const data = getInputs();
         
-        // Validation
         const requiredFields = [data.docType, data.teacher, data.grade, data.quarter, data.subject, data.section, data.topic, data.cs, data.ps, data.lc, data.model, data.approver, data.approverPos];
         if(requiredFields.some(f => !f || f.trim() === '')) {
              Swal.fire({ icon: 'warning', title: 'Missing Fields', text: 'Please fill in all mandatory fields (marked with *).' });
@@ -548,19 +531,10 @@
                 - ELABORATE -> Step G & H.
                 - EVALUATE -> Step I.
             `;
-        } else if (model === "IDEA") {
-             modelInstructions = `
-                STRICT IDEA MAPPING:
-                - INTRODUCTION -> Step A/B/C.
-                - DEVELOPMENT -> Step D/E.
-                - ENGAGEMENT -> Step F/G.
-                - ASSIMILATION -> Step H/I.
-             `;
         } else {
              modelInstructions = `STRICT 7E's MAPPING: ELICIT/ENGAGE->A/B. EXPLORE->C/D. EXPLAIN->E. ELABORATE->F/G/H. EVALUATE->I. EXTEND->J.`;
         }
 
-        // Instructions for Auto-Generating Objectives based on Standards
         const objGenInst = `
             Task 1: Analyze Content Std: "${data.cs}", Perf Std: "${data.ps}", Competency: "${data.lc}".
             Based on these, GENERATE:
@@ -570,6 +544,8 @@
             4. One Subject Integration (e.g. Mathematics, English).
             
             Task 2: Create Lesson Procedures using ${model} model.
+            
+            IMPORTANT: For EVERY activity in the procedure that requires student output, insert a DETAILED 15-POINT RUBRIC (e.g., Accuracy: 5pts, Creativity: 5pts, Timeliness: 5pts).
         `;
 
         if (isDLP) {
@@ -621,26 +597,21 @@
             let text = await response.text();
             text = cleanOutput(text);
 
-            // 1. Extract Auto-Generated Objectives
             const cog = extractSection(text, 'COG');
             const psy = extractSection(text, 'PSY');
             const aff = extractSection(text, 'AFF');
             const int = extractSection(text, 'INT');
 
-            // 2. Populate Sidebar Fields (Readonly)
             if(cog) document.getElementById('cs_cog').value = cog;
             if(psy) document.getElementById('cs_psy').value = psy;
             if(aff) document.getElementById('cs_aff').value = aff;
             if(int) document.getElementById('cs_int').value = int;
 
-            // 3. Populate Preview Content
             const res = extractSection(text, 'RESOURCES');
             if(res) document.getElementById('cell-resources-dll').innerHTML = marked.parse(res);
             
-            // Re-render layout to show new Objectives in the table
             renderEmptyLayout(); 
 
-            // 4. Populate Procedures
             const maxDays = isDLP ? 1 : 5;
             for(let i=1; i<=maxDays; i++) {
                 if(!isDLP && !document.getElementById(`date-d${i}`).value) continue;
@@ -667,7 +638,8 @@
              Swal.fire({ icon: 'warning', title: 'Empty Plan', text: 'Please generate a plan before downloading.' });
              return;
         }
-        var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Lesson Plan</title></head><body>";
+        var css = "<style>body{font-family:Arial}table{border-collapse:collapse;width:100%}td,th{border:1px solid #000;padding:5px;vertical-align:top}.official-header{text-align:center}.sig-block{float:left;width:30%}</style>";
+        var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Lesson Plan</title>" + css + "</head><body>";
         var footer = "</body></html>";
         var sourceHTML = header + document.getElementById("paperContent").innerHTML + footer;
 
@@ -680,9 +652,8 @@
         document.body.removeChild(fileDownload);
     }
     
-    // Initialize
     toggleInputs();
-    liveUpdateHeader();
+    renderEmptyLayout();
 </script>
 </body>
 </html>
