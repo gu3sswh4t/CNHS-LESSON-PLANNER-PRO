@@ -531,24 +531,26 @@
         const modelInst = data.model === "4As" ? "MAPPING: ACTIVITY->C,D. ANALYSIS->E. ABSTRACTION->H. APPLICATION->G." 
             : data.model === "5Es" ? "MAPPING: ENGAGE->A,B. EXPLORE->C,D. EXPLAIN->E,F. ELABORATE->G,H. EVALUATE->I." 
             : "MAPPING: ELICIT/ENGAGE->A,B. EXPLORE->C,D. EXPLAIN->E. ELABORATE->F,G,H. EVALUATE->I. EXTEND->J.";
+        
+        const DLP_Specifics = isDLP ? "CRITICAL: For DLP Procedures, use a format with visible interaction like:\n**Teacher:** [Activity]\n**Student:** [Activity]\n" : "";
 
         const commonInst = `Std Inputs: CS:"${data.cs}", PS:"${data.ps}", LC:"${data.lc}". 
         MANDATORY RULES: 
         1. OBJECTIVES: Formulate specific COGNITIVE, PSYCHOMOTOR, and AFFECTIVE objectives.
-        2. INTEGRATION: Integrate at least 3 specific subjects (Math, English, etc.) listed on separate lines.
-        3. II. CONTENT: Generate detailed, simple, and short subject matter (bullet points), NOT just the title.
-        4. PROCEDURES: Follow ${data.model} model using: ${modelInst}. Verify steps are accurate to the model. Do not concatenate text. 
+        2. INTEGRATION: Integrate at least 3 subjects from: Science, Mathematics, History, Values Education, Astronomy, Chemistry, Psychology, Economics, Politics, Technology, Physics, Social Science. Explain their connection.
+        3. II. CONTENT: Generate clear, simple, and short content bullets (NOT just the topic title).
+        4. PROCEDURES: Follow ${data.model} model using: ${modelInst}. ${DLP_Specifics}
         5. FORMATTING: Use DOUBLE NEWLINES (\n\n) between every distinct step, paragraph, or list item to prevent merging.
-        6. RUBRICS: For EVERY activity, include a simple scoring rubric on a new line.
+        6. RUBRICS: For EVERY activity, include a simple scoring rubric on a new line (e.g. 5pts: criteria... \n 3pts: criteria...).
         7. RESOURCES: Include specific ONLINE REFERENCES (URLs).`;
         
         let prompt = "";
         if (isDLP) {
-            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Detailed Subject Matter (Short & Simple)</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
+            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Subject Matter</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
         } else {
             const activeDays = data.dates.map((d,i) => d ? (i+1) : null).filter(d => d);
             const activeDaysStr = activeDays.map(d => `Day ${d}`).join(', ');
-            prompt = `Act as DepEd Teacher. Create DLL for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} IMPORTANT: Generate content ONLY for: ${activeDaysStr}. Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> Day 1: <D1_C>Subject Matter (Short & Simple)</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> (Repeat for active days)`;
+            prompt = `Act as DepEd Teacher. Create DLL for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} IMPORTANT: Generate content ONLY for: ${activeDaysStr}. Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> Day 1: <D1_C>Subject Matter</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> (Repeat for active days)`;
         }
 
         try {
