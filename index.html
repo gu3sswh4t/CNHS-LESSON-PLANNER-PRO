@@ -83,7 +83,7 @@
 
         .parsed-md { white-space: normal; }
         .parsed-md ul, .parsed-md ol { padding-left: 20px; margin: 5px 0; }
-        .parsed-md li { margin-bottom: 8px; line-height: 1.4; } 
+        .parsed-md li { margin-bottom: 8px; line-height: 1.4; display: list-item; } 
         .parsed-md p { margin: 0 0 8px 0; }
         .parsed-md strong { font-weight: 700; color: #000; }
         .parsed-md a { color: blue; text-decoration: underline; word-break: break-all; }
@@ -536,6 +536,8 @@
                 2. ANALYSIS -> Put in Step E. (Deep Analysis Questions - NO RUBRIC).
                 3. ABSTRACTION -> Put in Step H. (Core Discussion/Key Points/Concepts - NO RUBRIC).
                 4. APPLICATION -> Put in Step G. (Real World Application Task + 15pt Rubric).
+                
+                Other Steps (A, B, F, I, J) MUST be filled with standard routine/evaluation procedures.
             `;
         } else if (model === "5Es") {
             modelInstructions = `
@@ -563,11 +565,12 @@
             Total Duration: ${data.duration} minutes. Partition this time across steps.
             
             MANDATORY REQUIREMENTS:
-            - FORMATTING: Use Markdown lists (*) for ALL sections. Put every distinct point/step/objective on a NEW LINE.
+            - FORMATTING: Use Markdown bullet lists (*) for ALL sections. Put every distinct point/step/objective on a NEW LINE.
             - II. CONTENT <D1_C>: Must be a detailed bulleted outline with at least 2 main topics.
             - RESOURCES <RESOURCES>: Must contain at least 2 distinct URL links.
             - ABSTRACTION (Step H): Discuss CLEAR KEY POINTS of the lesson using bullet points.
             - RUBRICS: Include a 15-POINT RUBRIC only for Activity and Application steps.
+            - FILL ALL SECTIONS: Do not leave any tag empty.
         `;
 
         if (isDLP) {
@@ -588,7 +591,7 @@
                 <D1_D>(Step D)</D1_D> <D1_E>(Step E - Analysis)</D1_E> <D1_F>(Step F)</D1_F> 
                 <D1_G>(Step G - Application)</D1_G> <D1_H>(Step H - Abstraction/Key Points)</D1_H> <D1_I>(Step I)</D1_I> <D1_J>(Step J)</D1_J>
                 
-                Use Markdown lists (*). Do not leave tags empty.
+                Generate pure text with XML tags. No intro/outro.
             `;
         } else {
             const activeIndices = [];
@@ -614,7 +617,7 @@
         }
 
         try {
-            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use XML Tags. Use Markdown lists (*) for content. Ensure new lines for every point.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
+            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use XML Tags. Use Markdown lists (*) for content. Ensure new lines for every point. Never leave tags empty.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
             if (response.status === 502) throw new Error("Server overloaded. Please try again in 10 seconds.");
             let text = await response.text();
             text = cleanOutput(text);
