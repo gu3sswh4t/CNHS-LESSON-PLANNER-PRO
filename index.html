@@ -529,23 +529,23 @@
         let modelInstructions = "";
         if (model === "4As") {
             modelInstructions = `
-                STRICT 4A's MAPPING (Allocate time from ${data.duration} mins):
-                - ACTIVITY -> Step C & D.
-                - ANALYSIS -> Step E.
-                - ABSTRACTION -> Step H.
-                - APPLICATION -> Step G.
+                STRICT 4A's SEQUENCE MAPPING:
+                1. ACTIVITY -> Put in Step C & D. (Student Activity + 15pt Rubric).
+                2. ANALYSIS -> Put in Step E. (Analysis Questions - NO RUBRIC).
+                3. ABSTRACTION -> Put in Step H. (Core Discussion/Key Points - NO RUBRIC).
+                4. APPLICATION -> Put in Step G. (Application Task + 15pt Rubric).
             `;
         } else if (model === "5Es") {
             modelInstructions = `
-                STRICT 5E's MAPPING (Allocate time from ${data.duration} mins):
-                - ENGAGE -> Step A & B.
-                - EXPLORE -> Step C & D.
-                - EXPLAIN -> Step E & F.
-                - ELABORATE -> Step G & H.
-                - EVALUATE -> Step I.
+                STRICT 5E's MAPPING:
+                - ENGAGE -> A/B.
+                - EXPLORE -> C/D.
+                - EXPLAIN -> E/F.
+                - ELABORATE -> G/H.
+                - EVALUATE -> I.
             `;
         } else {
-             modelInstructions = `STRICT 7E's MAPPING (Allocate time from ${data.duration} mins): ELICIT/ENGAGE->A/B. EXPLORE->C/D. EXPLAIN->E. ELABORATE->F/G/H. EVALUATE->I. EXTEND->J.`;
+             modelInstructions = `STRICT 7E's MAPPING: ELICIT/ENGAGE->A/B. EXPLORE->C/D. EXPLAIN->E. ELABORATE->F/G/H. EVALUATE->I. EXTEND->J.`;
         }
 
         const objGenInst = `
@@ -558,13 +558,13 @@
             4. One Subject Integration (e.g. Mathematics, English).
             
             Task 2: Create Lesson Procedures using ${model} model.
-            Total Duration: ${data.duration} minutes. You MUST indicate time allotment for EACH step (e.g. "Step A (5 mins)").
+            Total Duration: ${data.duration} minutes. Partition this time across steps.
             
             IMPORTANT:
-            - Content must be educationally accurate and precise.
-            - DO NOT LEAVE Steps D, E, G, H EMPTY. Partition the content properly.
-            - Include VALID ONLINE URL REFERENCES in <RESOURCES>.
-            - For EVERY activity requiring output, insert a 15-POINT RUBRIC (e.g., Accuracy: 5pts, Creativity: 5pts, Timeliness: 5pts).
+            - Content <D1_C> MUST be a detailed topic outline.
+            - <RESOURCES> MUST contain at least 3 valid online URLs.
+            - ABSTRACTION (Step H): Discuss CLEAR KEY POINTS of the lesson.
+            - RUBRICS: Only for Activity and Application steps.
         `;
 
         if (isDLP) {
@@ -578,14 +578,14 @@
                 <PSY>Generated Psychomotor Objective</PSY>
                 <AFF>Generated Affective Objective</AFF>
                 <INT>Generated Subject Integration</INT>
-                <RESOURCES>List online URL references here</RESOURCES>
+                <RESOURCES>List 3+ Online URL references</RESOURCES>
 
-                <D1_C>(Content)</D1_C>
-                <D1_A>(Step A)</D1_A> <D1_B>(Step B)</D1_B> <D1_C_Proc>(Step C)</D1_C_Proc>
-                <D1_D>(Step D)</D1_D> <D1_E>(Step E)</D1_E> <D1_F>(Step F)</D1_F> 
-                <D1_G>(Step G)</D1_G> <D1_H>(Step H)</D1_H> <D1_I>(Step I)</D1_I> <D1_J>(Step J)</D1_J>
+                <D1_C>Detailed Lesson Content Outline</D1_C>
+                <D1_A>(Step A)</D1_A> <D1_B>(Step B)</D1_B> <D1_C_Proc>(Step C - Activity)</D1_C_Proc>
+                <D1_D>(Step D)</D1_D> <D1_E>(Step E - Analysis)</D1_E> <D1_F>(Step F)</D1_F> 
+                <D1_G>(Step G - Application)</D1_G> <D1_H>(Step H - Abstraction/Key Points)</D1_H> <D1_I>(Step I)</D1_I> <D1_J>(Step J)</D1_J>
                 
-                Use Markdown for content. Be concise to ensure all tags are filled.
+                Use Markdown. Do not leave tags empty.
             `;
         } else {
             const activeIndices = [];
@@ -603,15 +603,15 @@
                 <PSY>Generated Psychomotor Objective</PSY>
                 <AFF>Generated Affective Objective</AFF>
                 <INT>Generated Subject Integration</INT> 
-                <RESOURCES>List online URL references here</RESOURCES>
+                <RESOURCES>List 3+ Online URL references</RESOURCES>
 
-                Day 1: <D1_C>...</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
-                Day 2: <D2_C>...</D2_C> ... (Repeat format for active days)
+                Day 1: <D1_C>Detailed Content</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
+                Day 2: <D2_C>Detailed Content</D2_C> ... (Repeat format)
             `;
         }
 
         try {
-            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use XML Tags for sections. Ensure 100% accuracy and complete all steps.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
+            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use XML Tags for sections. Ensure 100% accuracy and complete all steps. Never leave Resources or Content empty.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
             if (response.status === 502) throw new Error("Server overloaded. Please try again in 10 seconds.");
             let text = await response.text();
             text = cleanOutput(text);
