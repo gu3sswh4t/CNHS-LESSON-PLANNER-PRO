@@ -89,9 +89,9 @@
         .parsed-md a { color: blue; text-decoration: underline; word-break: break-all; }
         
         /* Table Styles for Rubrics */
-        .parsed-md table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 8pt; }
-        .parsed-md th, .parsed-md td { border: 1px solid #333; padding: 4px; text-align: left; }
-        .parsed-md th { background-color: #f1f5f9; font-weight: bold; }
+        .parsed-md table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 8pt; border: 1px solid #000; }
+        .parsed-md th, .parsed-md td { border: 1px solid #000; padding: 6px; text-align: left; }
+        .parsed-md th { background-color: #f1f5f9; font-weight: bold; text-transform: uppercase; }
 
         @media print {
             @page { size: landscape; margin: 5mm; } 
@@ -537,10 +537,12 @@
         if (model === "4As") {
             modelInstructions = `
                 STRICT 4A's SEQUENCE MAPPING:
-                1. ACTIVITY -> Put in Step C & D. (Detailed Student Activity + 15pt Rubric).
-                2. ANALYSIS -> Put in Step E. (Deep Analysis Questions - NO RUBRIC).
-                3. ABSTRACTION -> Put in Step H. (Core Discussion/Key Points/Concepts - NO RUBRIC).
-                4. APPLICATION -> Put in Step G. (Real World Application Task + 15pt Rubric).
+                1. ACTIVITY (Step C & D): Start with word **ACTIVITY**. Provide Content. Then insert a Rubric Table.
+                2. ANALYSIS (Step E): Start with word **ANALYSIS**. Provide Analysis Questions.
+                3. ABSTRACTION (Step H): Start with word **ABSTRACTION**. Provide Core Key Points.
+                4. APPLICATION (Step G): Start with word **APPLICATION**. Provide Task. Then insert a Rubric Table.
+                
+                Other Steps (A, B, F, I, J) must be filled with standard routine/evaluation procedures.
             `;
         } else if (model === "5Es") {
             modelInstructions = `
@@ -568,11 +570,12 @@
             Total Duration: ${data.duration} minutes. Partition this time across steps.
             
             MANDATORY REQUIREMENTS:
-            1. REFERENCE LINKS: You MUST generate <RESOURCES> tag containing at least 3 valid educational URL links. This is CRITICAL.
-            2. FORMATTING: Use paragraphs for narrative. Use bullets (*) ONLY for lists.
-            3. RUBRICS: For Activity (Step C) and Application (Step G), create a 15-point rubric formatted as a MARKDOWN TABLE (Criteria|Score).
-            4. ABSTRACTION (Step H): Discuss CLEAR KEY POINTS of the lesson using bullet points.
-            5. FILL ALL SECTIONS: Do not leave any tag empty.
+            1. REFERENCE LINKS: <RESOURCES> tag MUST contain at least 3 valid educational URL links (Text + Link).
+            2. FORMATTING: Use bullets (*) ONLY for lists. Use paragraphs for normal text.
+            3. RUBRICS: For Activity (Step C) and Application (Step G), create a 15-point rubric formatted STRICTLY as a MARKDOWN TABLE using | syntax. 
+               Example: | Criteria | 5 Points | 3 Points | 
+            4. ABSTRACTION (Step H): Discuss CLEAR KEY POINTS of the lesson.
+            5. FILL ALL SECTIONS: Do not leave any tag empty. Remove words like "Step A", just provide the content.
         `;
 
         if (isDLP) {
@@ -587,12 +590,11 @@
                 <PSY>Generated Psychomotor Objective</PSY>
                 <AFF>Generated Affective Objective</AFF>
                 <INT>Generated Subject Integration</INT>
-                
 
                 <D1_C>List at least 2 main topic points</D1_C>
-                <D1_A>(Step A - Review)</D1_A> <D1_B>(Step B - Purpose)</D1_B> <D1_C_Proc>(Step C - Activity)</D1_C_Proc>
-                <D1_D>(Step D - Concept 1)</D1_D> <D1_E>(Step E - Analysis)</D1_E> <D1_F>(Step F - Mastery)</D1_F> 
-                <D1_G>(Step G - Application)</D1_G> <D1_H>(Step H - Abstraction/Key Points)</D1_H> <D1_I>(Step I - Evaluate)</D1_I> <D1_J>(Step J - Additional)</D1_J>
+                <D1_A>(Content for Review)</D1_A> <D1_B>(Content for Purpose)</D1_B> <D1_C_Proc>**ACTIVITY** (Content + Rubric Table)</D1_C_Proc>
+                <D1_D>(Content for Concept 1)</D1_D> <D1_E>**ANALYSIS** (Content)</D1_E> <D1_F>(Content for Mastery)</D1_F> 
+                <D1_G>**APPLICATION** (Content + Rubric Table)</D1_G> <D1_H>**ABSTRACTION** (Key Points)</D1_H> <D1_I>(Content for Evaluate)</D1_I> <D1_J>(Content for Additional)</D1_J>
                 
                 Generate pure text with XML tags. No intro/outro.
             `;
@@ -613,7 +615,6 @@
                 <PSY>Generated Psychomotor Objective</PSY>
                 <AFF>Generated Affective Objective</AFF>
                 <INT>Generated Subject Integration</INT> 
-                
 
                 Day 1: <D1_C>List at least 2 main topic points</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
                 Day 2: <D2_C>Detailed Content</D2_C> ... (Repeat format)
