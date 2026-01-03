@@ -505,18 +505,19 @@
 
         const commonInst = `Std Inputs: CS:"${data.cs}", PS:"${data.ps}", LC:"${data.lc}". 
         RULES: 
-        1. CS must include Cog/Psy/Aff & Integration. 
-        2. Follow ${data.model} using ${modelInst}. 
-        3. MANDATORY: For EVERY activity or evaluation in procedures, include a RUBRIC or SCORING GUIDE on a new line (e.g. "Rubric: 5pts - Accurate..."). 
-        4. Use double newlines for spacing. 
-        5. Specific References required.
-        6. Format text clearly with Markdown (bolding, lists).`;
+        1. OBJECTIVES: Must formulate specific Cognitive, Psychomotor, and Affective objectives.
+        2. INTEGRATION: Integrate at least 3 specific subjects (Math, English, etc.) listed on separate lines.
+        3. II. CONTENT: Generate detailed subject matter/key concepts, not just the topic title.
+        4. PROCEDURES: Follow ${data.model} model using ${modelInst}. Include specific activities.
+        5. RUBRICS: For every activity, provide a scoring rubric/guide on a new line.
+        6. Step J (Additional Activities): Provide specific remediation/enrichment activities.
+        7. Use double newlines for spacing.`;
         
         let prompt = "";
         if (isDLP) {
-            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Topic</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
+            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Detailed Subject Matter</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
         } else {
-            prompt = `Act as DepEd Teacher. Create 5-DAY DLL for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> Day 1: <D1_C>...</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> (Repeat for D2-D5)`;
+            prompt = `Act as DepEd Teacher. Create 5-DAY DLL for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> Day 1: <D1_C>Detailed Subject Matter</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> (Repeat for D2-D5)`;
         }
 
         try {
