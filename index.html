@@ -147,6 +147,11 @@
             <div class="form-group"><label>Day 5</label><input type="date" id="date-d5" onchange="renderEmptyLayout()"></div>
         </div>
 
+        <div class="form-group">
+            <label>Teaching Duration<span class="required-mark">*</span></label>
+            <input type="text" id="duration" placeholder="e.g. 60 Minutes" oninput="renderEmptyLayout()">
+        </div>
+
         <div class="row">
             <div class="form-group">
                 <label>Grade Level<span class="required-mark">*</span></label>
@@ -287,6 +292,7 @@
             teacher: teacherName,
             dlpDate: document.getElementById('dlp-date').value,
             teachingTime: teachingTime,
+            duration: document.getElementById('duration').value,
             dates: [1,2,3,4,5].map(i => document.getElementById(`date-d${i}`).value),
             grade: document.getElementById('grade').value,
             subject: document.getElementById('subject').value,
@@ -344,6 +350,10 @@
                 <tr>
                     <td class="header-label">Teaching Time</td><td class="header-val">${data.teachingTime}</td>
                     <td class="header-label">Section</td><td class="header-val">${data.section}</td>
+                </tr>
+                <tr>
+                    <td class="header-label">Duration</td><td class="header-val">${data.duration}</td>
+                    <td class="header-label">Topic</td><td class="header-val">${data.topic}</td>
                 </tr>
             </table>
         `;
@@ -431,7 +441,7 @@
                         </div>
                         <div style="display: flex;">
                             <div style="width: 90px; font-weight: 600;">Version:</div>
-                            <div>2.2 (Stable Build)</div>
+                            <div>2.3 (Stable Build)</div>
                         </div>
                     </div>
                 </div>
@@ -447,6 +457,23 @@
         });
     }
 
+    function exportToWord() {
+        var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+        var footer = "</body></html>";
+        var sourceHTML = header+document.getElementById("paperContent").innerHTML+footer;
+
+        var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+        var fileDownload = document.createElement("a");
+        document.body.appendChild(fileDownload);
+        fileDownload.href = source;
+        fileDownload.download = 'lesson_plan.doc';
+        fileDownload.click();
+        document.body.removeChild(fileDownload);
+    }
+
     function validateInputs(data) {
         if(!data.docType) return "Please select a Document Type.";
         if(!data.school) return "School Name is required.";
@@ -458,6 +485,7 @@
             if(!hasDates) return "Please select at least one Teaching Day for DLL.";
         }
         if(!data.teachingTime) return "Teaching Time is required.";
+        if(!data.duration) return "Teaching Duration is required.";
         if(!data.grade) return "Please select a Grade Level.";
         if(!data.subject) return "Subject is required.";
         if(!data.quarter) return "Please select a Quarter.";
@@ -504,21 +532,28 @@
             : "MAPPING: ELICIT/ENGAGE->A,B. EXPLORE->C,D. EXPLAIN->E. ELABORATE->F,G,H. EVALUATE->I. EXTEND->J.";
 
         const commonInst = `Std Inputs: CS:"${data.cs}", PS:"${data.ps}", LC:"${data.lc}". 
-        MANDATORY INSTRUCTIONS (Strictly Follow):
-        1. OBJECTIVES: Formulate specific objectives for COGNITIVE, PSYCHOMOTOR, and AFFECTIVE domains.
-        2. INTEGRATION: Integrate at least 3 specific subjects (e.g. Math, English, Values) and list them clearly on separate lines.
+        MANDATORY RULES: 
+        1. OBJECTIVES: Formulate specific COGNITIVE, PSYCHOMOTOR, and AFFECTIVE objectives.
+        2. INTEGRATION: Integrate at least 3 specific subjects (Math, English, etc.) listed on separate lines.
         3. II. CONTENT: Generate detailed subject matter key concepts/outline (NOT just the topic title).
-        4. PROCEDURES: Follow the ${data.model} model using this mapping: ${modelInst}.
-        5. RUBRICS: For EVERY activity/task in the procedures, provide a specific SCORING RUBRIC (e.g., 5pts - criteria, 3pts - criteria) on a new line.
-        6. REMEDIATION: In Step J, provide specific remediation/enrichment activities.
-        7. SPACING: Use double newlines between sections for clarity.
-        8. FORMAT: Use Markdown tables or lists where appropriate.`;
+        4. RESOURCES: Include specific ONLINE REFERENCES (URLs) in the Learning Resources.
+        5. PROCEDURES: Follow the ${data.model} model using this mapping: ${modelInst}.
+        6. RUBRICS: For EVERY activity in the procedures, provide a SCORING RUBRIC (e.g. 5pts-criteria) on a new line.
+        7. SPACING: Use double newlines between sections.`;
         
         let prompt = "";
         if (isDLP) {
-            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Detailed Subject Matter</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
+            prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES><D1_C>Detailed Subject Matter</D1_C><D1_A>...</D1_A><D1_B>...</D1_B><D1_C_Proc>...</D1_C_Proc><D1_D>...</D1_D><D1_E>...</D1_E><D1_F>...</D1_F><D1_G>...</D1_G><D1_H>...</D1_H><D1_I>...</D1_I><D1_J>...</D1_J>`;
         } else {
-            prompt = `Act as DepEd Teacher. Create 5-DAY DLL for "${data.topic}" (${data.subject}, ${data.grade}) using ${data.model}. ${commonInst} Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> Day 1: <D1_C>Detailed Subject Matter</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> (Repeat for D2-D5)`;
+            // Filter only active days for DLL prompt to avoid hallucinating content for empty days
+            const activeDays = data.dates.map((d,i) => d ? (i+1) : null).filter(d => d);
+            const activeDaysStr = activeDays.map(d => `Day ${d}`).join(', ');
+            
+            prompt = `Act as DepEd Teacher. Create DLL for "${data.topic}" (${data.subject}, ${data.grade}, Duration: ${data.duration}) using ${data.model}. ${commonInst} 
+            IMPORTANT: Generate content ONLY for these days: ${activeDaysStr}. 
+            Gen XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> 
+            Day 1: <D1_C>Subject Matter</D1_C><D1_A>...</D1_A>...<D1_J>...</D1_J> 
+            (Repeat structure for other active days)`;
         }
 
         try {
