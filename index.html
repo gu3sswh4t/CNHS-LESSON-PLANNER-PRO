@@ -386,9 +386,13 @@
             <table class="tpl-table dll-grid">
                 <tr><th style="width:140px"></th>${colsHTML}</tr>
                 <tr><td colspan="${colSpan+1}" style="background:#e5e7eb; font-weight:bold;">I. OBJECTIVES</td></tr>
-                <tr><td class="dll-row-header">A. Content Standards</td><td colspan="${colSpan}" id="cell-cs" class="parsed-md">${data.cs || '<i>(Auto-generated)</i>'}</td></tr>
-                <tr><td class="dll-row-header">B. Performance Standards</td><td colspan="${colSpan}" id="cell-ps" class="parsed-md">${data.ps || '<i>(Auto-generated)</i>'}</td></tr>
-                <tr><td class="dll-row-header">C. Learning Competencies</td><td colspan="${colSpan}" id="cell-lc" class="parsed-md">${data.lc || '<i>(Auto-generated)</i>'}</td></tr>
+                <tr><td colspan="${colSpan+1}" id="cell-cs" class="parsed-md">
+                    <strong>A. Content Standards:</strong> ${data.cs || '<i>(Auto)</i>'}<br><br>
+                    <strong>B. Performance Standards:</strong> ${data.ps || '<i>(Auto)</i>'}<br><br>
+                    <strong>C. Learning Competencies:</strong> ${data.lc || '<i>(Auto)</i>'}<br><br>
+                    <strong>D. Specific Objectives (Cognitive, Psychomotor, Affective) & Integration:</strong><br>
+                    <span id="gen-objectives"><i>(Will appear here after generation)</i></span>
+                </td></tr>
                 ${gridRows}
                 <tr><td class="dll-row-header">V. REMARKS</td><td colspan="${colSpan}" style="height:30px"></td></tr>
                 <tr><td class="dll-row-header">VI. REFLECTION</td><td colspan="${colSpan}" style="height:30px"></td></tr>
@@ -432,7 +436,7 @@
                         </div>
                         <div style="display: flex;">
                             <div style="width: 90px; font-weight: 600;">Version:</div>
-                            <div>2.4 (Stable Build)</div>
+                            <div>2.5 (Stable Build)</div>
                         </div>
                     </div>
                 </div>
@@ -525,15 +529,15 @@
         const DLP_Specifics = isDLP ? "CRITICAL for DLP: Procedures MUST show specific interaction. e.g. **Teacher:** Question... **Student:** Answer..." : "";
         const Integration_List = "Science, Mathematics, History, Values Education, Astronomy, Chemistry, Psychology, Economics, Politics, Technology, Physics, Social Science";
 
-        // We build the prompt dynamically to ensure tags are correct
+        // Prompt Construction
         const commonInst = `
         Inputs: CS:${data.cs}, PS:${data.ps}, LC:${data.lc}.
         RULES:
-        1. OBJECTIVES: Include Cognitive, Psychomotor, Affective.
-        2. INTEGRATION: Integrate 3 subjects from (${Integration_List}). Specifics on how they relate.
-        3. CONTENT: Bulleted list of key concepts.
-        4. PROCEDURES: Follow ${data.model} model (${modelInst}). ${DLP_Specifics}
-        5. RUBRICS: Required for activities. Use new lines.
+        1. OBJECTIVES: Generate 'SPECIFIC_OBJS' tag containing: **Cognitive:** [Obj] <br> **Psychomotor:** [Obj] <br> **Affective:** [Obj] <br> **Integration:** [3 Subjects from: ${Integration_List}]
+        2. CONTENT: Generate strictly 1 or 2 key concepts/sub-topics.
+        3. PROCEDURES: Follow ${data.model} model (${modelInst}). ${DLP_Specifics}
+        4. RUBRICS: For EVERY activity, include a simple scoring rubric.
+        5. RESOURCES: Include 2 valid URLs.
         6. FORMAT: Use double newlines for clarity.
         `;
 
@@ -541,11 +545,10 @@
         let xmlStructure = "";
         
         if (isDLP) {
-            xmlStructure = "<D1_C>Content</D1_C><D1_A>Proc A</D1_A><D1_B>Proc B</D1_B><D1_C_Proc>Proc C</D1_C_Proc><D1_D>Proc D</D1_D><D1_E>Proc E</D1_E><D1_F>Proc F</D1_F><D1_G>Proc G</D1_G><D1_H>Proc H</D1_H><D1_I>Proc I</D1_I><D1_J>Proc J</D1_J>";
+            xmlStructure = "<SPECIFIC_OBJS>...</SPECIFIC_OBJS><RESOURCES>...</RESOURCES><D1_C>Content</D1_C><D1_A>Proc A</D1_A><D1_B>Proc B</D1_B><D1_C_Proc>Proc C</D1_C_Proc><D1_D>Proc D</D1_D><D1_E>Proc E</D1_E><D1_F>Proc F</D1_F><D1_G>Proc G</D1_G><D1_H>Proc H</D1_H><D1_I>Proc I</D1_I><D1_J>Proc J</D1_J>";
             prompt = `Act as DepEd Teacher. Create DETAILED Lesson Plan for "${data.topic}" (${data.subject}, ${data.grade}). ${commonInst} 
-            Output strictly in XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES>${xmlStructure}`;
+            Output strictly in XML: ${xmlStructure}`;
         } else {
-            // DLL: Dynamically build the requested XML tags based on active days
             let dayPrompts = "";
             data.dates.forEach((date, index) => {
                 if(date) {
@@ -554,7 +557,7 @@
                 }
             });
             prompt = `Act as DepEd Teacher. Create DLL for "${data.topic}" (${data.subject}, ${data.grade}). ${commonInst} 
-            Output strictly in XML: <CS>...</CS><PS>...</PS><LC>...</LC><RESOURCES>...</RESOURCES> ${dayPrompts}`;
+            Output strictly in XML: <SPECIFIC_OBJS>...</SPECIFIC_OBJS><RESOURCES>...</RESOURCES> ${dayPrompts}`;
         }
 
         try {
@@ -568,9 +571,10 @@
             let text = await response.text();
             text = cleanOutput(text);
 
-            const cs = extractSection(text, 'CS'); if(cs) document.getElementById('cell-cs').innerHTML = marked.parse(cs);
-            const ps = extractSection(text, 'PS'); if(ps) document.getElementById('cell-ps').innerHTML = marked.parse(ps);
-            const lc = extractSection(text, 'LC'); if(lc) document.getElementById('cell-lc').innerHTML = marked.parse(lc);
+            // Parsing the new SPECIFIC_OBJS tag
+            const specObjs = extractSection(text, 'SPECIFIC_OBJS'); 
+            if(specObjs) document.getElementById('gen-objectives').innerHTML = marked.parse(specObjs);
+
             const res = extractSection(text, 'RESOURCES'); if(res) document.getElementById('cell-resources-dll').innerHTML = marked.parse(res);
 
             const maxDays = isDLP ? 1 : 5;
