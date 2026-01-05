@@ -267,6 +267,18 @@
 </div>
 
 <script>
+    // AUTO-DETECT FILE PROTOCOL AND WARN
+    window.onload = function() {
+        if (window.location.protocol === 'file:') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Browser Security Restriction',
+                html: 'You are running this file directly (file://).<br>Browsers block advanced AI connections in this mode.<br><br><b>The app will try a "Simple Mode" (GET Request), but for best results, please run this using VS Code Live Server.</b>',
+                confirmButtonText: 'I Understand'
+            });
+        }
+    };
+
     let generatedData = {}; 
 
     function toggleInputs() {
@@ -410,8 +422,9 @@
         data.dates.forEach((d, i) => { if(d) activeIndices.push(i+1); });
         const dayStr = data.docType === 'DLP' ? "Day 1" : `Days: ${activeIndices.join(',')}`;
 
-        const systemMessage = "You are a strict XML generator for DepEd Lesson Plans. Output ONLY valid XML tags. Do not output markdown. Do not explain your logic. If asked for 5 days, generate all 5 days concisely.";
-
+        // FORCE THE AI TO BE QUIET AND JUST OUTPUT XML
+        const systemMessage = "You are a JSON/XML generator. Output ONLY the raw XML string. Do not use Markdown blocks. Do not explain. Do not use tool calls. Do not chat.";
+        
         let instruction = "";
         if (data.docType === 'DLL') {
             instruction = `
@@ -449,6 +462,8 @@
             `;
         }
 
+        let text = "";
+
         try {
             const response = await fetch('https://text.pollinations.ai/', { 
                 method: 'POST', 
@@ -465,17 +480,13 @@
             });
 
             if (!response.ok) throw new Error("API Busy");
-            let text = await response.text();
+            text = await response.text();
             
             console.log("AI RAW OUTPUT:", text); // Debugging
 
-            text = text.replace(/```xml/g, '').replace(/```/g, '');
-            const firstTagIndex = text.indexOf('<');
-            if(firstTagIndex > 0) text = text.substring(firstTagIndex);
-
             generatedData = { text: text, days: data.docType === 'DLP' ? [1] : activeIndices, topic: data.topic };
 
-            // FAIL-SAFE EXTRACTOR
+            // FAIL-SAFE EXTRACTOR: Scan strictly for tags and ignore the rest
             const extract = (tag) => { 
                 const regex = new RegExp(`<${tag}>([\\s\\S]*?)<\/${tag}>`, 'i');
                 const m = text.match(regex); 
@@ -501,9 +512,8 @@
                 });
             });
 
-            // FINAL FALLBACK: If Strict XML failed, dump the raw text into the first day
+            // If the AI failed to format XML, dump raw text into the first available slot as a backup
             if(!hasContent) {
-                 console.warn("XML Parsing Failed. Dumping Raw Text.");
                  if(generatedData.days.length > 0) {
                      const firstDay = generatedData.days[0];
                      document.getElementById(`d${firstDay}-content`).innerHTML = 
