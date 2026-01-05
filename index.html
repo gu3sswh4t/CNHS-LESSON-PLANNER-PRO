@@ -467,12 +467,15 @@
             if (!response.ok) throw new Error("API Busy");
             let text = await response.text();
             
+            console.log("AI RAW OUTPUT:", text); // Debugging
+
             text = text.replace(/```xml/g, '').replace(/```/g, '');
             const firstTagIndex = text.indexOf('<');
             if(firstTagIndex > 0) text = text.substring(firstTagIndex);
 
             generatedData = { text: text, days: data.docType === 'DLP' ? [1] : activeIndices, topic: data.topic };
 
+            // FAIL-SAFE EXTRACTOR
             const extract = (tag) => { 
                 const regex = new RegExp(`<${tag}>([\\s\\S]*?)<\/${tag}>`, 'i');
                 const m = text.match(regex); 
@@ -498,7 +501,16 @@
                 });
             });
 
-            if(!hasContent) throw new Error("Empty Response");
+            // FINAL FALLBACK: If Strict XML failed, dump the raw text into the first day
+            if(!hasContent) {
+                 console.warn("XML Parsing Failed. Dumping Raw Text.");
+                 if(generatedData.days.length > 0) {
+                     const firstDay = generatedData.days[0];
+                     document.getElementById(`d${firstDay}-content`).innerHTML = 
+                        "<b>AI Generation Format Error. Raw output below:</b><br><br>" + marked.parse(text);
+                     hasContent = true; 
+                 }
+            }
 
             document.getElementById('previewModal').style.display = 'flex';
             if(typeof Swal !== 'undefined') Swal.fire({ icon: 'success', title: 'Generated!', timer: 1000, showConfirmButton: false });
