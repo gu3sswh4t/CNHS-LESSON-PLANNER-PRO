@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LESSON PLANNER Pro + PPT</title>
+    <title>LESSON PLANNER Pro</title>
+    <meta name="description" content="AI-Powered Lesson Plan Generator for DepEd Teachers">
+    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -234,7 +236,7 @@
         <div class="modal-body">
             <div class="bond-paper" id="paperContent">
                 <div class="official-header">
-                    <img id="headerLogo" src="logo.png" alt="School Logo" crossorigin="anonymous" onerror="this.style.display='none'">
+                    <img id="headerLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAaVBMVEX///8AAAAzMzN/f3+ZmZmqqqqLi4u/v7/39/fDw8O7u7vn5+e+vr7MzMzS0tKmpqbGxsa1tbWioqJzc3NPT09dXV07OztiYmJEREQwMDBqamoaGholJSVHR0dAQEAeHh4NDQ0sLCwWFhY6vWpZAAAE30lEQVR4nO3d23KjOhSA4U04Bts4xyaQzP3/v3VA0onj0k6c0kh7+621MdFw0Y2QJQsJAAAAAAAAAAAAAAAAAAAAAACwK/98/L5cT9vX/fF8P22v18v3x/88sFm/9vft42F13M4uT7sfP3/ePq7r/f/80Ga8/twet43Jb5/296fNf/74IK16f/90gcnvr/t/+eC2/P1+gcnvP354Q173C0x+f/jgpvz4XGDy++0HN+Tf1wUmv//44YbcFxj9/uOHN+TfAnO/f/vhDflbYO73nz+8IfcFRr//+OEN+bfA3O/ffnhD/i0w9/u3H96Q3wJzv//84Q25LzD6/ccPb8i/BeZ+//bDG/Jvgblf//C2/P1+gcnv//zD2/L1dYHJ77/+4W153S8w+f3nD2/L6/d9gcnvP//wtrxe9wtMfr/98La8fheY/P77D2/L63OBya/++G253l8LTN72x/P9tL1eL98fP75ZAAAAAAAAAAAAAAAAALB75Z+P35fraXv88bK5/d/vP//+8fE/D23S1/6+fTysjttZ48f9/unr47re/88Pbcbrz+1x25j89mn/09fNf/74IK16f/90gcnvr/t/+eC2/P1+gcnvP354Q173C0x+f/jgpvz4XGDy++0HN+Tf1wUmv//44YbcFxj9/uOHN+TfAnO/f/vhDflbYO73nz+8IfcFRr//+OEN+bfA3O/ffnhD/i0w9/u3H96Q3wJzv//84Q25LzD6/ccPb8i/BeZ+//bDG/Jvgblf//C2/P1+gcnv//zD2/L1dYHJ77/+4W153S8w+f3nD2/L6/d9gcnvP//wtrxe9wtMfr/98La8fheY/P77D2/L63OBya/++G253l8LTN72x/P9tL1eL98fP75ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgJ/18/L5cT9vX/fF8P22v18v3x/88sFm/9vft42F13M4uT7sfP3/ePq7r/f/80Ga8/twet43Jb5/296fNf/74IK16f/90gcnvr/t/+eC2/P1+gcnvP354Q173C0x+f/jgpvz4XGDy++0HN+Tf1wUmv//44YbcFxj9/uOHN+TfAnO/f/vhDflbYO73nz+8IfcFRr//+OEN+bfA3O/ffnhD/i0w9/u3H96Q3wJzv//84Q25LzD6/ccPb8i/BeZ+//bDG/Jvgblf//C2/P1+gcnv//zD2/L1dYHJ77/+4W153S8w+f3nD2/L6/d9gcnvP//wtrxe9wtMfr/98La8fheY/P77D2/L63OBya/++G253l8LTN72x/P9tL1eL98fP75ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgJ/18/L5cT9vX/fF8P22v18v3x/88sFm/9vft42F13M4uT7sfP3/ePq7r/f/80Ga8/twet43Jb5/296fNf/74IK16f/90gcnvr/t/+eC2/P1+gcnvP354Q173C0x+f/jgpvz4XGDy++0HN+Tf1wUmv//44YbcFxj9/uOHN+TfAnO/f/vhDflbYO73nz+8IfcFRr//+OEN+bfA3O/ffnhD/i0w9/u3H96Q3wJzv//84Q25LzD6/ccPb8i/BeZ+//bDG/Jvgblf//C2/P1+gcnv//zD2/L1dYHJ77/+4W153S8w+f3nD2/L6/d9gcnvP//wtrxe9wtMfr/98La8fheY/P77D2/L63OBya/++G253l8LTN72x/P9tL1eL98fP75ZAAAAAAAAAAAAAAAAAOzef0V0W+09yM0hAAAAAElFTkSuQmCC" alt="School Logo" crossorigin="anonymous">
                     <h5>Republic of the Philippines</h5>
                     <h5>Department of Education</h5>
                     <h5>Region XI</h5>
@@ -408,52 +410,54 @@
         data.dates.forEach((d, i) => { if(d) activeIndices.push(i+1); });
         const dayStr = data.docType === 'DLP' ? "Day 1" : `Days: ${activeIndices.join(',')}`;
 
-        // HARDENED SYSTEM PROMPT
-        const systemMessage = "You are a strict XML generator for DepEd Lesson Plans. Output ONLY valid XML tags. Do not output markdown. Do not explain your logic. Do not include conversational fillers. If you are asked for 5 days, generate all 5.";
+        const systemMessage = "You are a strict XML generator for DepEd Lesson Plans. Output ONLY valid XML tags. Do not output markdown. Do not explain your logic. If asked for 5 days, generate all 5 days concisely.";
 
-        const prompt = `
-            Topic: "${data.topic}" (${data.subject}, ${data.grade}).
+        let instruction = "";
+        if (data.docType === 'DLL') {
+            instruction = `
+            Task: Create a 5-DAY DLL for "${data.topic}" (${data.subject}, ${data.grade}).
             Model: ${data.model}.
-            Standards: CS:"${data.cs}", PS:"${data.ps}", LC:"${data.lc}".
+            Inputs: CS:${data.cs}, PS:${data.ps}, LC:${data.lc}.
             
-            Generate strict XML for these days: ${dayStr}.
+            IMPORTANT: You MUST generate content for ALL 5 DAYS (Day 1 to Day 5). 
+            Keep content CONCISE (bullet points) to fit length limits.
             
-            XML FORMAT REQUIRED:
-            <CS>(Standards content)</CS> 
-            <REF>(Resources content)</REF>
+            FORMAT (Repeat for Day 1, 2, 3, 4, 5):
+            <D1_TOPIC>Topic 1</D1_TOPIC>
+            <D1_A>Review...</D1_A> ... <D1_J>...</D1_J>
+            <PPT_D1>
+            SLIDE: Title | ...
+            SLIDE: Content | ...
+            </PPT_D1>
             
-            [REPEAT THIS BLOCK FOR EACH REQUESTED DAY - CHANGE X to 1, 2, 3...]:
-            <DX_TOPIC>(Topic Title)</DX_TOPIC>
-            <DX_A>(Review)</DX_A>
-            <DX_B>(Purpose)</DX_B>
-            <DX_C>(Examples)</DX_C>
-            <DX_D>(Discussion 1)</DX_D>
-            <DX_E>(Discussion 2)</DX_E>
-            <DX_F>(Mastery)</DX_F>
-            <DX_G>(Application)</DX_G>
-            <DX_H>(Generalization)</DX_H>
-            <DX_I>(Evaluation)</DX_I>
-            <DX_J>(Additional)</DX_J>
+            (Then D2_TOPIC, D2_A... etc up to D5)
             
-            <PPT_DX>
-            SLIDE: Title | ${data.topic}
-            SLIDE: Objectives | 1. Understand... 2. Apply...
-            SLIDE: Review | Key points...
-            SLIDE: Introduction | Definition...
-            SLIDE: Content 1 | Detail...
-            SLIDE: Content 2 | Detail...
-            SLIDE: Activity | Instruction...
-            SLIDE: Quiz | Questions...
-            </PPT_DX>
-        `;
+            Global Tags: <CS>...</CS> <REF>...</REF>
+            `;
+        } else {
+            instruction = `
+            Task: Create a DETAILED DLP for "${data.topic}" (${data.subject}, ${data.grade}).
+            Model: ${data.model}.
+            Inputs: CS:${data.cs}, PS:${data.ps}, LC:${data.lc}.
+            
+            Generate strict XML for Day 1. Be highly detailed.
+            FORMAT:
+            <CS>...</CS> <REF>...</REF>
+            <D1_TOPIC>...</D1_TOPIC>
+            <D1_A>...</D1_A> ... <D1_J>...</D1_J>
+            <PPT_D1>...</PPT_D1>
+            `;
+        }
 
         try {
             const response = await fetch('https://text.pollinations.ai/', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                credentials: 'omit',
                 body: JSON.stringify({ 
                     messages: [
                         { role: 'system', content: systemMessage }, 
-                        { role: 'user', content: prompt }
+                        { role: 'user', content: instruction }
                     ], 
                     model: 'openai', 
                     seed: Math.floor(Math.random() * 999999) 
@@ -463,16 +467,13 @@
             if (!response.ok) throw new Error("API Busy");
             let text = await response.text();
             
-            // AGGRESSIVE CLEANING to remove thought process
             text = text.replace(/```xml/g, '').replace(/```/g, '');
-            // Remove text before the first tag if AI chats
             const firstTagIndex = text.indexOf('<');
             if(firstTagIndex > 0) text = text.substring(firstTagIndex);
 
             generatedData = { text: text, days: data.docType === 'DLP' ? [1] : activeIndices, topic: data.topic };
 
             const extract = (tag) => { 
-                // Flexible regex to catch tags even if nested
                 const regex = new RegExp(`<${tag}>([\\s\\S]*?)<\/${tag}>`, 'i');
                 const m = text.match(regex); 
                 return m ? m[1].trim() : ''; 
@@ -504,8 +505,9 @@
 
         } catch (e) {
             console.error(e);
-            if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'The AI output was incomplete. Please click Generate again.' });
-            else alert('Generation Failed. Check internet.');
+            let msg = "Generation failed. Please try again.";
+            if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Generation Failed', text: msg });
+            else alert(msg);
         } finally {
             btn.disabled = false; spinner.style.display = 'none'; btnText.innerText = "Generate Document";
         }
@@ -526,7 +528,6 @@
         generatedData.days.forEach(i => {
             let pptContent = extract(`PPT_D${i}`);
             
-            // Fallback content if AI tag is empty
             if (!pptContent || pptContent.length < 10) {
                  pptContent = `SLIDE: Title | ${generatedData.topic} - Day ${i}
                  SLIDE: Introduction | Overview of the lesson topic.
@@ -550,10 +551,8 @@
                     } else {
                         let slide = pptx.addSlide();
                         slide.background = { color: 'f1f5f9' };
-                        // Header
                         slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1, fill: { color: '3b82f6' } });
                         slide.addText(type.toUpperCase(), { x: 0.5, y: 0.25, fontSize: 24, color: 'FFFFFF', bold: true });
-                        // Content
                         slide.addText(content, { x: 0.5, y: 1.5, w: '90%', h: 4, fontSize: 18, color: '334155', valign: 'top' });
                     }
                 }
