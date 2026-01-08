@@ -328,6 +328,14 @@
             </table>
         `;
 
+        const pptRow = isDLP 
+            ? '<td id="d1-ppt" class="parsed-md"></td>' 
+            : '<td id="d1-ppt" class="parsed-md"></td><td id="d2-ppt" class="parsed-md"></td><td id="d3-ppt" class="parsed-md"></td><td id="d4-ppt" class="parsed-md"></td><td id="d5-ppt" class="parsed-md"></td>';
+
+        const contentRow = isDLP 
+            ? '<td id="d1-content" class="parsed-md"></td>' 
+            : '<td id="d1-content" class="parsed-md"></td><td id="d2-content" class="parsed-md"></td><td id="d3-content" class="parsed-md"></td><td id="d4-content" class="parsed-md"></td><td id="d5-content" class="parsed-md"></td>';
+
         let gridRows = '';
         const steps = [
             { id: 'a', label: 'A. Review / Presenting new lesson' },
@@ -345,15 +353,13 @@
         gridRows += `
             <tr>
                 <td style="background:#e5e7eb; font-weight:bold;">II. CONTENT</td>
-                ${isDLP ? '<td id="d1-content" class="parsed-md"></td>' : 
-                  '<td id="d1-content" class="parsed-md"></td><td id="d2-content" class="parsed-md"></td><td id="d3-content" class="parsed-md"></td><td id="d4-content" class="parsed-md"></td><td id="d5-content" class="parsed-md"></td>'}
+                ${contentRow}
             </tr>
             <tr><td colspan="${colSpan+1}" style="background:#e5e7eb; font-weight:bold;">III. LEARNING RESOURCES</td></tr>
             <tr><td class="dll-row-header">A. References</td><td colspan="${colSpan}" id="cell-resources-dll" class="parsed-md"></td></tr>
             <tr>
                 <td class="dll-row-header">B. PowerPoint Presentation</td>
-                ${isDLP ? '<td id="d1-ppt" class="parsed-md"></td>' : 
-                  '<td id="d1-ppt" class="parsed-md"></td><td id="d2-ppt" class="parsed-md"></td><td id="d3-ppt" class="parsed-md"></td><td id="d4-ppt" class="parsed-md"></td><td id="d5-ppt" class="parsed-md"></td>'}
+                ${pptRow}
             </tr>
             <tr><td colspan="${colSpan+1}" style="background:#e5e7eb; font-weight:bold;">IV. PROCEDURES</td></tr>
         `;
@@ -477,7 +483,7 @@
             ${modelInstructions}
             3. **Rubrics**: For EVERY procedure step that involves an activity, include a SIMPLE RUBRIC (e.g., "5pts: Accurate... 3pts: ...").
             4. **Resources**: Specific references/links required.
-            5. **PowerPoint (<DX_PPT>)**: For EACH day, create a COMPREHENSIVE, DETAILED Slide-by-Slide outline. Format: "Slide 1: Title (Bullets), Slide 2:..."
+            5. **PowerPoint**: For EACH day, create a Concise Slide-by-Slide outline inside the <Dx_PPT> tag. Format: "Slide 1: Title (Bullets), Slide 2:..."
         `;
 
         if (isDLP) {
@@ -516,11 +522,11 @@
                 <LC>${data.lc ? data.lc : 'Generate'}</LC> 
                 <RESOURCES>Refs</RESOURCES>
 
-                Day 1: <D1_PPT>Detailed Slides...</D1_PPT> <D1_C>...</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
-                Day 2: <D2_PPT>Detailed Slides...</D2_PPT> <D2_C>...</D2_C> ...
-                Day 3: <D3_PPT>Detailed Slides...</D3_PPT> <D3_C>...</D3_C> ...
-                Day 4: <D4_PPT>Detailed Slides...</D4_PPT> <D4_C>...</D4_C> ...
-                Day 5: <D5_PPT>Detailed Slides...</D5_PPT> <D5_C>...</D5_C> ...
+                Day 1: <D1_PPT>Slide 1: ...</D1_PPT> <D1_C>...</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
+                Day 2: <D2_PPT>Slide 1: ...</D2_PPT> <D2_C>...</D2_C> ...
+                Day 3: <D3_PPT>Slide 1: ...</D3_PPT> <D3_C>...</D3_C> ...
+                Day 4: <D4_PPT>Slide 1: ...</D4_PPT> <D4_C>...</D4_C> ...
+                Day 5: <D5_PPT>Slide 1: ...</D5_PPT> <D5_C>...</D5_C> ...
             `;
         }
 
@@ -547,7 +553,9 @@
                 if(content) document.getElementById(`d${i}-content`).innerHTML = marked.parse(content);
                 
                 const ppt = extractSection(text, `D${i}_PPT`);
-                if(ppt) document.getElementById(`d${i}-ppt`).innerHTML = marked.parse(ppt);
+                if(ppt && document.getElementById(`d${i}-ppt`)) {
+                    document.getElementById(`d${i}-ppt`).innerHTML = marked.parse(ppt);
+                }
 
                 const steps = ['A','B','C','D','E','F','G','H','I','J'];
                 steps.forEach(s => {
