@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LESSON PLANNER Pro</title>
+    <title>LESSON PLANNER Pro - Gemini Powered</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Arial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <style>
         :root { --primary: #0f172a; --accent: #2563eb; --bg-app: #e2e8f0; --paper-width: 216mm; --paper-height: 330mm; } 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,6 +35,10 @@
         .btn-secondary:hover { background: #f1f5f9; }
         .btn-dev { background: #334155; color: white; border: none; margin-top: 5px; }
         .btn-dev:hover { background: #1e293b; }
+
+        .ppt-download-area { margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px; display: none; }
+        .btn-ppt { background: #c0392b; color: white; border: none; padding: 8px; border-radius: 4px; width: 100%; margin-bottom: 5px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+        .btn-ppt:hover { background: #a93226; }
 
         .btn-home-back {
             background: linear-gradient(45deg, #1e3a8a, #2563eb, #3b82f6);
@@ -86,8 +91,8 @@
         .dll-row-header { background: #f3f4f6; font-weight: bold; width: 150px; }
         .col-day { width: 18%; }
         
-        .signature-section { margin-top: auto; padding-top: 20px; font-size: 9pt; page-break-inside: avoid; display: flex; justify-content: space-between; }
-        .sig-block { width: 45%; }
+        .signature-section { margin-top: auto; padding-top: 20px; font-size: 9pt; page-break-inside: avoid; display: flex; justify-content: space-between; gap: 20px; }
+        .sig-block { flex: 1; }
         .sig-name { font-weight: bold; text-transform: uppercase; border-bottom: 1px solid black; display: block; text-align: center; margin-top: 30px; }
         .sig-pos { font-size: 8pt; text-align: center; display: block; margin-top: 4px; }
         
@@ -96,9 +101,9 @@
 
         .parsed-md ul, .parsed-md ol { padding-left: 15px; margin: 0; }
         .parsed-md p { margin: 0 0 5px 0; }
-        .parsed-md strong { font-weight: bold; color: #000; }
-        .parsed-md em { font-style: italic; color: #444; }
         
+        .api-missing { border: 2px solid #ef4444; background: #fee2e2; }
+
         @media print {
             @page { size: auto; margin: 5mm; } 
             body { background: white; display: block; height: auto; }
@@ -123,10 +128,20 @@
             <i class="fa-solid fa-school"></i> Go to CNHS Website
         </button>
 
-        <div class="section-label">I. Configuration</div>
+        <div class="section-label">I. AI Configuration</div>
+        <div class="form-group">
+            <label style="color:#2563eb;">Google Gemini API Key (Free)</label>
+            <input type="password" id="apiKey" placeholder="Paste Key Here..." onchange="saveKey()">
+            <small style="display:block; margin-top:4px; font-size:0.7rem; color:#64748b;">
+                Free & Unlimited. Get one at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.
+            </small>
+        </div>
+
+        <div class="section-label">II. Document Setup</div>
         <div class="form-group">
             <label>Document Type</label>
             <select id="docType" onchange="toggleInputs()">
+                <option value="" disabled selected>Select Document Type...</option>
                 <option value="DLP">Detailed Lesson Plan (DLP)</option>
                 <option value="DLL">Daily Lesson Log (DLL - 1 Week)</option>
             </select>
@@ -134,7 +149,7 @@
 
         <div class="form-group"><label>School Name</label><input type="text" id="school" value="COGON NATIONAL HIGH SCHOOL" oninput="liveUpdateHeader()"></div>
         
-        <div id="dlp-date-group">
+        <div id="dlp-date-group" style="display:none;">
             <div class="form-group"><label>Teacher</label><input type="text" id="teacher" placeholder="Name"></div>
             <div class="row">
                 <div class="form-group">
@@ -164,38 +179,68 @@
         </div>
 
         <div class="row">
-            <div class="form-group"><label>Grade</label><input type="text" id="grade" placeholder="Grade 11"></div>
+            <div class="form-group">
+                <label>Grade Level</label>
+                <select id="grade">
+                    <option value="" disabled selected>Select Grade...</option>
+                    <option value="Grade 7">Grade 7</option>
+                    <option value="Grade 8">Grade 8</option>
+                    <option value="Grade 9">Grade 9</option>
+                    <option value="Grade 10">Grade 10</option>
+                    <option value="Grade 11">Grade 11</option>
+                    <option value="Grade 12">Grade 12</option>
+                </select>
+            </div>
             <div class="form-group"><label>Subject</label><input type="text" id="subject" placeholder="Science"></div>
         </div>
-        <div class="form-group"><label>Quarter</label><input type="text" id="quarter" placeholder="First Quarter"></div>
+        <div class="form-group">
+            <label>Quarter</label>
+            <select id="quarter">
+                <option value="" disabled selected>Select Quarter...</option>
+                <option value="First Quarter">First Quarter</option>
+                <option value="Second Quarter">Second Quarter</option>
+                <option value="Third Quarter">Third Quarter</option>
+                <option value="Fourth Quarter">Fourth Quarter</option>
+            </select>
+        </div>
         <div class="form-group" id="section-group"><label>Section</label><input type="text" id="section" placeholder="Section Name"></div>
 
-        <div class="section-label">II. Lesson Content</div>
+        <div class="section-label">III. Lesson Content</div>
         <div class="form-group"><label>Topic</label><input type="text" id="topic" placeholder="e.g. Plate Tectonics"></div>
         <div class="form-group"><label>Content Stds</label><textarea id="cs" placeholder="Demonstrates..."></textarea></div>
         <div class="form-group"><label>Perf. Stds</label><textarea id="ps" placeholder="Is able to..."></textarea></div>
         <div class="form-group"><label>Competency</label><textarea id="lc" placeholder="Code..."></textarea></div>
 
-        <div class="section-label">III. Settings</div>
+        <div class="section-label">IV. Settings</div>
         <div class="form-group">
             <label>Instructional Model</label>
             <select id="model">
+                <option value="" disabled selected>Select Model...</option>
                 <option value="4As">4A's (Activity, Analysis, Abstraction, Application)</option>
                 <option value="5Es">5E's (Engage, Explore, Explain, Elaborate, Evaluate)</option>
                 <option value="7Es">7E's (Elicit, Engage, Explore, Explain, Elaborate, Evaluate, Extend)</option>
             </select>
         </div>
 
-        <div class="section-label">IV. Signatories</div>
+        <div class="section-label">V. Signatories</div>
         <div class="row">
             <div class="form-group"><label>Teacher Pos</label><input type="text" id="teacherPos" placeholder="Teacher I"></div>
             <div class="form-group"><label>Checker</label><input type="text" id="checker" placeholder="Head Name"></div>
         </div>
         <div class="form-group"><label>Checker Pos</label><input type="text" id="checkerPos" placeholder="Principal III"></div>
+        <div class="row">
+            <div class="form-group"><label>Approver</label><input type="text" id="approver" placeholder="PSDS Name"></div>
+            <div class="form-group"><label>Approver Pos</label><input type="text" id="approverPos" placeholder="Public Schools District Supervisor"></div>
+        </div>
 
         <button class="btn-generate" onclick="generatePlan()">
             <span class="spinner" id="spin"></span> <span id="btnText">Generate Plan</span>
         </button>
+
+        <div id="pptArea" class="ppt-download-area">
+            <div class="section-label" style="margin-bottom:10px;">DOWNLOAD POWERPOINTS</div>
+            <div id="pptButtons"></div>
+        </div>
 
         <div class="btn-group">
             <button class="btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> PDF/Print</button>
@@ -225,11 +270,24 @@
         <div class="signature-section">
             <div class="sig-block"><div>PREPARED BY:</div><div class="sig-name" id="sigTeacherName"></div><div class="sig-pos" id="sigTeacherPos"></div></div>
             <div class="sig-block"><div>CHECKED BY:</div><div class="sig-name" id="sigCheckerName"></div><div class="sig-pos" id="sigCheckerPos"></div></div>
+            <div class="sig-block"><div>APPROVED BY:</div><div class="sig-name" id="sigApproverName"></div><div class="sig-pos" id="sigApproverPos"></div></div>
         </div>
     </div>
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if(savedKey) document.getElementById('apiKey').value = savedKey;
+        renderEmptyLayout();
+    });
+
+    function saveKey() {
+        const key = document.getElementById('apiKey').value;
+        localStorage.setItem('gemini_api_key', key);
+        if(key) document.getElementById('apiKey').classList.remove('api-missing');
+    }
+
     function toggleInputs() {
         const type = document.getElementById('docType').value;
         const paper = document.getElementById('paperContent');
@@ -240,7 +298,7 @@
             paper.classList.add('landscape');
             dlpGroup.style.display = 'none';
             dllGroup.style.display = 'block';
-        } else {
+        } else if (type === 'DLP') {
             paper.classList.add('landscape'); 
             dlpGroup.style.display = 'block';
             dllGroup.style.display = 'none';
@@ -256,6 +314,7 @@
         
         return {
             docType: type,
+            apiKey: document.getElementById('apiKey').value,
             school: document.getElementById('school').value, 
             teacher: teacherName,
             dlpDate: document.getElementById('dlp-date').value, 
@@ -278,7 +337,9 @@
             model: document.getElementById('model').value, 
             teacherPos: document.getElementById('teacherPos').value,
             checker: document.getElementById('checker').value, 
-            checkerPos: document.getElementById('checkerPos').value
+            checkerPos: document.getElementById('checkerPos').value,
+            approver: document.getElementById('approver').value,
+            approverPos: document.getElementById('approverPos').value
         };
     }
     
@@ -297,6 +358,8 @@
         document.getElementById('sigTeacherPos').innerText = data.teacherPos.toUpperCase();
         document.getElementById('sigCheckerName').innerText = data.checker.toUpperCase();
         document.getElementById('sigCheckerPos').innerText = data.checkerPos.toUpperCase();
+        document.getElementById('sigApproverName').innerText = data.approver.toUpperCase();
+        document.getElementById('sigApproverPos').innerText = data.approverPos.toUpperCase();
 
         const isDLP = data.docType === 'DLP';
         const colSpan = isDLP ? 1 : 5;
@@ -392,7 +455,6 @@
     }
 
     function extractSection(text, tagName) {
-        // More robust regex to catch tags even if they have spaces or minor malformations
         const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'i');
         const match = text.match(regex);
         return match ? match[1].trim() : null;
@@ -400,25 +462,106 @@
 
     function cleanOutput(text) {
         if(!text) return "";
-        let clean = text.replace(/Support Pollinations\.AI[\s\S]*/gi, '');
-        // We do NOT remove code blocks here immediately to avoid stripping content if the AI wraps the whole XML in them
-        clean = clean.replace(/```xml/gi, '').replace(/```/gi, ''); 
-        const filters = [
-            /AFTER Application\/Elaborate, insert Rubric:/gi,
-            /\*\*AFTER Application\/Elaborate, insert Rubric:\*\*/gi,
-            /\(INTERNAL:[\s\S]*?\)/gi,
-        ];
-        filters.forEach(regex => { clean = clean.replace(regex, ''); });
+        let clean = text.replace(/```xml/gi, '').replace(/```/gi, ''); 
         return clean;
     }
     
     function showDevInfo() {
         Swal.fire({
-            title: '<strong>LESSON PLANNER Pro</strong>',
-            icon: 'info',
-            html: '<b>COGON NATIONAL HIGH SCHOOL</b><br>Developed by: <b>Joram V. Castro</b>',
-            showCloseButton: true, confirmButtonText: 'Close', confirmButtonColor: '#2563eb'
+            html: `
+                <div style="text-align:center; padding: 10px;">
+                    <div style="width:80px; height:80px; background:linear-gradient(135deg, #2563eb, #1e3a8a); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem; box-shadow:0 10px 20px rgba(37, 99, 235, 0.3);">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h2 style="color:#1e293b; margin:0; font-family:'Roboto', sans-serif;">LESSON PLANNER Pro</h2>
+                    <p style="color:#64748b; margin:5px 0 20px; font-size:0.9rem;">Empowering Teachers with AI</p>
+                    
+                    <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #e2e8f0; text-align:left; margin-bottom:10px;">
+                        <div style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:bold; letter-spacing:1px; margin-bottom:5px;">DEVELOPED BY</div>
+                        <div style="font-weight:bold; color:#334155; font-size:1.1rem;">JORAM V. CASTRO</div>
+                        <div style="font-size:0.85rem; color:#64748b;">ICT Coordinator / Full Stack Developer</div>
+                    </div>
+
+                     <div style="background:#f8fafc; padding:15px; border-radius:10px; border:1px solid #e2e8f0; text-align:left;">
+                        <div style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:bold; letter-spacing:1px; margin-bottom:5px;">INSTITUTION</div>
+                        <div style="font-weight:bold; color:#334155;">COGON NATIONAL HIGH SCHOOL</div>
+                        <div style="font-size:0.85rem; color:#64748b;">Division of IGACOS, Region XI</div>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 400
         });
+    }
+
+    // POWERPOINT GENERATION LOGIC
+    async function downloadPPT(dayIndex) {
+        const data = getInputs();
+        const pptContent = document.getElementById(`d${dayIndex}-ppt`)?.innerText;
+        const topic = document.getElementById(`d${dayIndex}-content`)?.innerText || data.topic;
+        
+        if (!pptContent || pptContent.trim().length < 10) {
+            Swal.fire({ icon: 'error', title: 'No Content', text: 'No PowerPoint content generated for this day yet.' });
+            return;
+        }
+
+        let pres = new PptxGenJS();
+        pres.layout = 'LAYOUT_16x9';
+        
+        // Slide 1: Title
+        let slide1 = pres.addSlide();
+        slide1.background = { color: "F1F5F9" };
+        slide1.addText(data.school.toUpperCase(), { x: 0.5, y: 0.5, w: "90%", align: "center", fontSize: 14, color: "64748B" });
+        slide1.addText(topic.toUpperCase(), { x: 1, y: 2, w: "80%", h: 2, align: "center", fontSize: 36, bold: true, color: "1E293B" });
+        slide1.addText(`Teacher: ${data.teacher}`, { x: 1, y: 4.5, w: "80%", align: "center", fontSize: 18, color: "334155" });
+        slide1.addText(data.dates[dayIndex-1] || "", { x: 1, y: 5, w: "80%", align: "center", fontSize: 14, italic:true, color: "334155" });
+
+        // Slide 2: Objectives
+        let slide2 = pres.addSlide();
+        slide2.addText("OBJECTIVES", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: "2563EB" });
+        const objText = document.getElementById('cell-lc').innerText;
+        slide2.addText(objText, { x: 0.5, y: 1.2, w: "90%", h: 5, fontSize: 14, color: "334155", valign:"top" });
+
+        // Slide 3: Procedures / Discussion Content
+        // We parse the generated PPT outline. 
+        // Strategy: Split by "Slide" or newlines to guess structure.
+        let slideLines = pptContent.split('\n');
+        let currentSlide = null;
+        let yPos = 1.2;
+
+        slideLines.forEach(line => {
+            line = line.trim();
+            if(!line) return;
+
+            // Detect new slide header
+            if (line.match(/^Slide \d+:/i) || line.match(/^\*\*Slide \d+:/i)) {
+                currentSlide = pres.addSlide();
+                let title = line.replace(/[*#]/g, '').replace(/^Slide \d+:/i, '').trim();
+                currentSlide.addText(title, { x: 0.5, y: 0.5, w: "90%", fontSize: 22, bold: true, color: "2563EB" });
+                yPos = 1.2;
+            } else if (currentSlide) {
+                // Add bullet point
+                let cleanLine = line.replace(/^[-*•]/, '').trim();
+                currentSlide.addText(cleanLine, { x: 0.8, y: yPos, w: "85%", fontSize: 16, color: "334155", bullet: true });
+                yPos += 0.5;
+                // If slide fills up, naive overflow handling (just clips for now, advanced logic too complex for single file)
+                if(yPos > 6.5) {
+                    currentSlide = pres.addSlide();
+                    currentSlide.addText("(Continued...)", { x: 0.5, y: 0.5, fontSize: 22, bold: true, color: "2563EB" });
+                    yPos = 1.2;
+                }
+            }
+        });
+
+        // Fallback if AI didn't format as "Slide X"
+        if (!currentSlide) {
+             let genericSlide = pres.addSlide();
+             genericSlide.addText("LESSON CONTENT", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: "2563EB" });
+             genericSlide.addText(pptContent, { x: 0.5, y: 1.2, w: "90%", h: 5, fontSize: 12, color: "334155" });
+        }
+
+        pres.writeFile({ fileName: `Lesson_Plan_Day_${dayIndex}.pptx` });
     }
 
     async function generatePlan() {
@@ -429,6 +572,17 @@
             return;
         }
 
+        if(!data.docType) { Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please select a Document Type.' }); return; }
+        if(!data.grade) { Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please select a Grade Level.' }); return; }
+        if(!data.model) { Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please select an Instructional Model.' }); return; }
+        if(!data.quarter) { Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please select a Quarter.' }); return; }
+
+        if(!data.apiKey) {
+            document.getElementById('apiKey').classList.add('api-missing');
+            Swal.fire({ icon: 'warning', title: 'API Key Required', html: 'Please paste your <b>Free Gemini API Key</b> in the sidebar.<br><a href="https://aistudio.google.com/app/apikey" target="_blank">Get one here</a>' });
+            return;
+        }
+
         if(!data.topic) { 
             Swal.fire({ icon: 'error', title: 'Missing Information', text: 'Please enter a Topic before generating.' });
             return; 
@@ -436,7 +590,11 @@
 
         renderEmptyLayout();
         const btn = document.querySelector('.btn-generate'); const spinner = document.getElementById('spin');
+        const pptArea = document.getElementById('pptArea');
+        const pptButtons = document.getElementById('pptButtons');
+        
         btn.disabled = true; spinner.style.display = 'inline-block';
+        pptArea.style.display = 'none';
         
         let prompt = "";
         const isDLP = data.docType === 'DLP';
@@ -480,9 +638,16 @@
                - **Integration:** [Subject & Details]
             3. **Procedures**: Follow ${model} Model. Use <D1_A>, <D1_B>, etc.
             4. **Content**: Put the Topic/Sub-topic inside <D1_TOPIC>.
-            5. **PowerPoint**: Concise slide outline inside <D1_PPT>.
+            5. **PowerPoint (<D1_PPT>)**: Create a VERY DETAILED, COMPREHENSIVE Slide-by-Slide discussion script.
+               FORMAT for PPT tag:
+               Slide 1: [Title of Slide]
+               - [Bullet point 1]
+               - [Bullet point 2]
+               Slide 2: [Title]
+               - [Content]
+               (Ensure at least 5-8 slides per day explaining the topic thoroughly).
             
-            IMPORTANT: OUTPUT MUST BE VALID XML. DO NOT ADD PREAMBLE TEXT.
+            IMPORTANT: OUTPUT MUST BE VALID XML WRAPPED IN A ROOT TAG.
         `;
 
         if (isDLP) {
@@ -491,6 +656,7 @@
                 ${commonInst}
                 
                 Required XML Structure (Fill all tags):
+                <ROOT>
                 <CS>Content Stds...</CS> 
                 <PS>${data.ps ? data.ps : 'Generate Performance Stds'}</PS> 
                 <OBJ_DETAILS>
@@ -502,11 +668,18 @@
                 <RESOURCES>List references</RESOURCES>
 
                 <D1_TOPIC>${data.topic}</D1_TOPIC>
-                <D1_PPT>Slide 1:..., Slide 2:...</D1_PPT>
+                <D1_PPT>
+                Slide 1: Introduction
+                - Point 1
+                Slide 2: Discussion
+                - Point 1
+                ...
+                </D1_PPT>
 
                 <D1_A>(Step A content)</D1_A> <D1_B>(Step B content)</D1_B> <D1_C_Proc>(Step C content)</D1_C_Proc>
                 <D1_D>(Step D content)</D1_D> <D1_E>(Step E content)</D1_E> <D1_F>(Step F content)</D1_F> 
                 <D1_G>(Step G content)</D1_G> <D1_H>(Step H content)</D1_H> <D1_I>(Step I content)</D1_I> <D1_J>(Step J content)</D1_J>
+                </ROOT>
             `;
         } else {
             const activeIndices = [];
@@ -519,6 +692,7 @@
                 ${activeDaysStr}
 
                 Required XML Structure:
+                <ROOT>
                 <CS>Content Stds...</CS> 
                 <PS>${data.ps ? data.ps : 'Generate'}</PS> 
                 <OBJ_DETAILS>
@@ -529,19 +703,31 @@
                 </OBJ_DETAILS>
                 <RESOURCES>Refs</RESOURCES>
 
-                Day 1: <D1_TOPIC>...</D1_TOPIC> <D1_PPT>...</D1_PPT> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
-                Day 2: <D2_TOPIC>...</D2_TOPIC> <D2_PPT>...</D2_PPT> <D2_C_Proc>...</D2_C_Proc> ...
+                Day 1: <D1_TOPIC>...</D1_TOPIC> <D1_PPT>Slide 1: ...</D1_PPT> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
+                Day 2: <D2_TOPIC>...</D2_TOPIC> <D2_PPT>Slide 1: ...</D2_PPT> <D2_C_Proc>...</D2_C_Proc> ...
                 (Repeat for other days)
+                </ROOT>
             `;
         }
 
         try {
-            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use the requested XML tags.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
-            if (response.status === 502) throw new Error("Server overloaded (502). Wait 30s & try again.");
-            let text = await response.text();
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${data.apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error?.message || "Gemini API Error");
+            }
+
+            const result = await response.json();
+            let text = result.candidates[0].content.parts[0].text;
             text = cleanOutput(text);
 
-            // Extract Main Header Data
             const cs = extractSection(text, 'CS');
             const ps = extractSection(text, 'PS');
             const objDetails = extractSection(text, 'OBJ_DETAILS');
@@ -550,37 +736,45 @@
             if(cs) document.getElementById('cell-cs').innerHTML = marked.parse(cs);
             if(ps) document.getElementById('cell-ps').innerHTML = marked.parse(ps);
             
-            // Combine LC input with generated Objectives Breakdown
             const lcInput = data.lc || "Specific Objectives:";
             const combinedLC = lcInput + "\n\n" + (objDetails || "");
             document.getElementById('cell-lc').innerHTML = marked.parse(combinedLC);
 
             if(res) document.getElementById('cell-resources-dll').innerHTML = marked.parse(res);
 
+            pptButtons.innerHTML = '';
             const maxDays = isDLP ? 1 : 5;
+            let hasPPT = false;
+
             for(let i=1; i<=maxDays; i++) {
                 if(!isDLP && !document.getElementById(`date-d${i}`).value) continue;
 
-                // Fix: Look for D1_TOPIC for content, not D1_C
                 const content = extractSection(text, `D${i}_TOPIC`);
                 if(content) document.getElementById(`d${i}-content`).innerHTML = marked.parse(content);
                 
                 const ppt = extractSection(text, `D${i}_PPT`);
                 if(ppt && document.getElementById(`d${i}-ppt`)) {
                     document.getElementById(`d${i}-ppt`).innerHTML = marked.parse(ppt);
+                    // Add Download Button for this day
+                    pptButtons.innerHTML += `<button class="btn-ppt" onclick="downloadPPT(${i})"><i class="fa-solid fa-file-powerpoint"></i> Download Day ${i} PPT</button>`;
+                    hasPPT = true;
                 }
 
                 const steps = ['A','B','C','D','E','F','G','H','I','J'];
                 steps.forEach(s => {
                     let tag = `D${i}_${s}`;
-                    if(s === 'C') tag = `D${i}_C_Proc`; // Special handling for Step C
+                    if(s === 'C') tag = `D${i}_C_Proc`; 
                     const val = extractSection(text, tag);
                     if(val) document.getElementById(`d${i}-proc-${s.toLowerCase()}`).innerHTML = marked.parse(val);
                 });
             }
+
+            if(hasPPT) pptArea.style.display = 'block';
+
             Swal.fire({ icon: 'success', title: 'Lesson Plan Generated!', timer: 1800, showConfirmButton: false });
         } catch (e) { 
-            Swal.fire({ icon: 'error', title: 'Server Error', text: e.message });
+            console.error(e);
+            Swal.fire({ icon: 'error', title: 'Generation Failed', text: e.message });
         } finally { btn.disabled = false; spinner.style.display = 'none'; }
     }
     
