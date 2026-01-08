@@ -383,7 +383,7 @@
                 <tr><td colspan="${colSpan+1}" style="background:#e5e7eb; font-weight:bold;">I. OBJECTIVES</td></tr>
                 <tr><td class="dll-row-header">A. Content Standards</td><td colspan="${colSpan}" id="cell-cs" class="parsed-md">${data.cs || '<i>Generating...</i>'}</td></tr>
                 <tr><td class="dll-row-header">B. Performance Standards</td><td colspan="${colSpan}" id="cell-ps" class="parsed-md">${data.ps || '<i>Generating...</i>'}</td></tr>
-                <tr><td class="dll-row-header">C. Learning Competencies</td><td colspan="${colSpan}" id="cell-lc" class="parsed-md">${data.lc || '<i>Generating...</i>'}</td></tr>
+                <tr><td class="dll-row-header">C. Learning Competencies & Objectives</td><td colspan="${colSpan}" id="cell-lc" class="parsed-md">${data.lc || '<i>Generating...</i>'}</td></tr>
                 ${gridRows}
                 <tr><td class="dll-row-header">V. REMARKS</td><td colspan="${colSpan}" style="height:30px"></td></tr>
                 <tr><td class="dll-row-header">VI. REFLECTION</td><td colspan="${colSpan}" style="height:30px"></td></tr>
@@ -392,7 +392,8 @@
     }
 
     function extractSection(text, tagName) {
-        const regex = new RegExp(`<${tagName}>([\\s\\S]*?)<\/${tagName}>`, 'i');
+        // More robust regex to catch tags even if they have spaces or minor malformations
+        const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'i');
         const match = text.match(regex);
         return match ? match[1].trim() : null;
     }
@@ -400,6 +401,7 @@
     function cleanOutput(text) {
         if(!text) return "";
         let clean = text.replace(/Support Pollinations\.AI[\s\S]*/gi, '');
+        // We do NOT remove code blocks here immediately to avoid stripping content if the AI wraps the whole XML in them
         clean = clean.replace(/```xml/gi, '').replace(/```/gi, ''); 
         const filters = [
             /AFTER Application\/Elaborate, insert Rubric:/gi,
@@ -440,50 +442,47 @@
         const isDLP = data.docType === 'DLP';
         const model = data.model;
 
+        // Model Instructions
         let modelInstructions = "";
         if (model === "4As") {
             modelInstructions = `
                 STRICT 4A's MAPPING TO DEPED STEPS:
-                - ACTIVITY Phase -> Put inside Step C (Presenting examples) and D (Discussing #1).
-                - ANALYSIS Phase -> Put inside Step E (Discussing #2).
-                - ABSTRACTION Phase -> Put inside Step H (Generalization).
-                - APPLICATION Phase -> Put inside Step G (Application).
-                *LABEL THE PHASES IN THE TEXT (e.g., "**[ACTIVITY PHASE]** ...")*
+                - ACTIVITY -> Step C & D.
+                - ANALYSIS -> Step E.
+                - ABSTRACTION -> Step H.
+                - APPLICATION -> Step G.
             `;
         } else if (model === "5Es") {
             modelInstructions = `
                 STRICT 5E's MAPPING TO DEPED STEPS:
-                - ENGAGE Phase -> Put inside Step A (Review) and B (Purpose).
-                - EXPLORE Phase -> Put inside Step C (Examples) and D (Discussing #1).
-                - EXPLAIN Phase -> Put inside Step E (Discussing #2) and F (Mastery).
-                - ELABORATE Phase -> Put inside Step G (Application) and H (Generalization).
-                - EVALUATE Phase -> Put inside Step I (Evaluation).
-                *LABEL THE PHASES IN THE TEXT (e.g., "**[ENGAGE PHASE]** ...")*
+                - ENGAGE -> Step A & B.
+                - EXPLORE -> Step C & D.
+                - EXPLAIN -> Step E & F.
+                - ELABORATE -> Step G & H.
+                - EVALUATE -> Step I.
             `;
         } else {
              modelInstructions = `
                 STRICT 7E's MAPPING:
-                - ELICIT/ENGAGE -> Step A/B.
-                - EXPLORE -> Step C/D.
-                - EXPLAIN -> Step E.
-                - ELABORATE -> Step F/G/H.
-                - EVALUATE -> Step I.
-                - EXTEND -> Step J.
-                *LABEL THE PHASES IN THE TEXT*
+                - ELICIT/ENGAGE -> A/B. EXPLORE -> C/D. EXPLAIN -> E. ELABORATE -> F/G/H. EVALUATE -> I. EXTEND -> J.
              `;
         }
 
         const commonInst = `
             Standards Inputs: CS Input: "${data.cs || 'None'}", PS: "${data.ps || 'None'}", LC: "${data.lc || 'None'}".
             
-            MANDATORY RULES:
-            1. **Content Standards (<CS>)**: MUST include Cognitive, Psychomotor, and Affective objectives AND Integration of 3 subjects.
-               FORMATTING: Separate these items with double newlines (\n\n) so they appear on new lines in the table.
-            2. **Procedures**: Follow the ${model} Model using the mapping below.
-            ${modelInstructions}
-            3. **Rubrics**: For EVERY procedure step that involves an activity, include a SIMPLE RUBRIC (e.g., "5pts: Accurate... 3pts: ...").
-            4. **Resources**: Specific references/links required.
-            5. **PowerPoint**: For EACH day, create a Concise Slide-by-Slide outline inside the <Dx_PPT> tag. Format: "Slide 1: Title (Bullets), Slide 2:..."
+            RULES:
+            1. **Content Standards**: Use <CS> tag.
+            2. **Objectives**: Inside <OBJ_DETAILS>, provide a bulleted list: 
+               - **Cognitive:** [Details]
+               - **Psychomotor:** [Details]
+               - **Affective:** [Details]
+               - **Integration:** [Subject & Details]
+            3. **Procedures**: Follow ${model} Model. Use <D1_A>, <D1_B>, etc.
+            4. **Content**: Put the Topic/Sub-topic inside <D1_TOPIC>.
+            5. **PowerPoint**: Concise slide outline inside <D1_PPT>.
+            
+            IMPORTANT: OUTPUT MUST BE VALID XML. DO NOT ADD PREAMBLE TEXT.
         `;
 
         if (isDLP) {
@@ -491,20 +490,23 @@
                 Act as DepEd Teacher. Create a DETAILED Lesson Plan (DLP) for "${data.topic}" (${data.subject}, ${data.grade}) using the **${model} Model**.
                 ${commonInst}
                 
-                Generate XML Tags:
-                <CS>Content Stds\n\nCognitive: ...\n\nPsychomotor: ...\n\nAffective: ...\n\nIntegration: ...</CS> 
-                <PS>${data.ps ? data.ps : 'Generate'}</PS> 
-                <LC>${data.lc ? data.lc : 'Generate'}</LC>
+                Required XML Structure (Fill all tags):
+                <CS>Content Stds...</CS> 
+                <PS>${data.ps ? data.ps : 'Generate Performance Stds'}</PS> 
+                <OBJ_DETAILS>
+                **Cognitive:** ...
+                **Psychomotor:** ...
+                **Affective:** ...
+                **Integration:** ...
+                </OBJ_DETAILS>
                 <RESOURCES>List references</RESOURCES>
 
-                <D1_PPT>Detailed Slide 1:..., Slide 2:..., Slide 3:...</D1_PPT>
+                <D1_TOPIC>${data.topic}</D1_TOPIC>
+                <D1_PPT>Slide 1:..., Slide 2:...</D1_PPT>
 
-                <D1_C>(Topic)</D1_C>
-                <D1_A>(Step A)</D1_A> <D1_B>(Step B)</D1_B> <D1_C_Proc>(Step C)</D1_C_Proc>
-                <D1_D>(Step D)</D1_D> <D1_E>(Step E)</D1_E> <D1_F>(Step F)</D1_F> 
-                <D1_G>(Step G)</D1_G> <D1_H>(Step H)</D1_H> <D1_I>(Step I)</D1_I> <D1_J>(Step J)</D1_J>
-                
-                NOTE: Omit REMARKS/REFLECTION. Use Markdown.
+                <D1_A>(Step A content)</D1_A> <D1_B>(Step B content)</D1_B> <D1_C_Proc>(Step C content)</D1_C_Proc>
+                <D1_D>(Step D content)</D1_D> <D1_E>(Step E content)</D1_E> <D1_F>(Step F content)</D1_F> 
+                <D1_G>(Step G content)</D1_G> <D1_H>(Step H content)</D1_H> <D1_I>(Step I content)</D1_I> <D1_J>(Step J content)</D1_J>
             `;
         } else {
             const activeIndices = [];
@@ -516,40 +518,51 @@
                 ${commonInst}
                 ${activeDaysStr}
 
-                Generate XML Tags:
-                <CS>Content Stds\n\nCognitive: ...\n\nPsychomotor: ...\n\nAffective: ...\n\nIntegration: ...</CS> 
+                Required XML Structure:
+                <CS>Content Stds...</CS> 
                 <PS>${data.ps ? data.ps : 'Generate'}</PS> 
-                <LC>${data.lc ? data.lc : 'Generate'}</LC> 
+                <OBJ_DETAILS>
+                **Cognitive:** ...
+                **Psychomotor:** ...
+                **Affective:** ...
+                **Integration:** ...
+                </OBJ_DETAILS>
                 <RESOURCES>Refs</RESOURCES>
 
-                Day 1: <D1_PPT>Slide 1: ...</D1_PPT> <D1_C>...</D1_C> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
-                Day 2: <D2_PPT>Slide 1: ...</D2_PPT> <D2_C>...</D2_C> ...
-                Day 3: <D3_PPT>Slide 1: ...</D3_PPT> <D3_C>...</D3_C> ...
-                Day 4: <D4_PPT>Slide 1: ...</D4_PPT> <D4_C>...</D4_C> ...
-                Day 5: <D5_PPT>Slide 1: ...</D5_PPT> <D5_C>...</D5_C> ...
+                Day 1: <D1_TOPIC>...</D1_TOPIC> <D1_PPT>...</D1_PPT> <D1_A>...</D1_A> <D1_B>...</D1_B> <D1_C_Proc>...</D1_C_Proc> <D1_D>...</D1_D> <D1_E>...</D1_E> <D1_F>...</D1_F> <D1_G>...</D1_G> <D1_H>...</D1_H> <D1_I>...</D1_I> <D1_J>...</D1_J>
+                Day 2: <D2_TOPIC>...</D2_TOPIC> <D2_PPT>...</D2_PPT> <D2_C_Proc>...</D2_C_Proc> ...
+                (Repeat for other days)
             `;
         }
 
         try {
-            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Use XML Tags.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
+            const response = await fetch('https://text.pollinations.ai/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'system', content: 'You are a DepEd Lesson Plan generator. Always use the requested XML tags.' }, { role: 'user', content: prompt }], model: 'openai', seed: Math.floor(Math.random() * 999999) }) });
             if (response.status === 502) throw new Error("Server overloaded (502). Wait 30s & try again.");
             let text = await response.text();
             text = cleanOutput(text);
 
+            // Extract Main Header Data
             const cs = extractSection(text, 'CS');
             const ps = extractSection(text, 'PS');
-            const lc = extractSection(text, 'LC');
+            const objDetails = extractSection(text, 'OBJ_DETAILS');
             const res = extractSection(text, 'RESOURCES');
+
             if(cs) document.getElementById('cell-cs').innerHTML = marked.parse(cs);
             if(ps) document.getElementById('cell-ps').innerHTML = marked.parse(ps);
-            if(lc) document.getElementById('cell-lc').innerHTML = marked.parse(lc);
+            
+            // Combine LC input with generated Objectives Breakdown
+            const lcInput = data.lc || "Specific Objectives:";
+            const combinedLC = lcInput + "\n\n" + (objDetails || "");
+            document.getElementById('cell-lc').innerHTML = marked.parse(combinedLC);
+
             if(res) document.getElementById('cell-resources-dll').innerHTML = marked.parse(res);
 
             const maxDays = isDLP ? 1 : 5;
             for(let i=1; i<=maxDays; i++) {
                 if(!isDLP && !document.getElementById(`date-d${i}`).value) continue;
 
-                const content = extractSection(text, `D${i}_C`);
+                // Fix: Look for D1_TOPIC for content, not D1_C
+                const content = extractSection(text, `D${i}_TOPIC`);
                 if(content) document.getElementById(`d${i}-content`).innerHTML = marked.parse(content);
                 
                 const ppt = extractSection(text, `D${i}_PPT`);
@@ -560,7 +573,7 @@
                 const steps = ['A','B','C','D','E','F','G','H','I','J'];
                 steps.forEach(s => {
                     let tag = `D${i}_${s}`;
-                    if(s === 'C') tag = `D${i}_C_Proc`; 
+                    if(s === 'C') tag = `D${i}_C_Proc`; // Special handling for Step C
                     const val = extractSection(text, tag);
                     if(val) document.getElementById(`d${i}-proc-${s.toLowerCase()}`).innerHTML = marked.parse(val);
                 });
